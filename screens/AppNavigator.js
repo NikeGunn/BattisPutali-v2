@@ -3,6 +3,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import PostVideo from "./PostVideo";
 
+
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => (
@@ -20,6 +21,7 @@ const AppNavigator = () => (
   >
   
     <Stack.Screen name="PostVideo" component={PostVideo} />
+
   </Stack.Navigator>
 );
 
