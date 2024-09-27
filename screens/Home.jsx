@@ -1,136 +1,73 @@
-// /App/screens/ho.js
-import React, { useEffect, useRef, useState } from 'react';
-import { View, FlatList, Dimensions, TouchableWithoutFeedback, Text, StyleSheet } from 'react-native';
-import { Video } from 'expo-av';
-import axios from 'axios';
-
-const { height } = Dimensions.get('window');
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { FlatList, StyleSheet, View, Dimensions, Text } from 'react-native';
+import VideoContainer from '../components/VideoContainer';
+import { getVideos } from '../components/api';
 
 const Home = () => {
   const [videos, setVideos] = useState([]);
-  const videoRefs = useRef([]);
-  const [currentVisibleVideoIndex, setCurrentVisibleVideoIndex] = useState(null);
+  const flatListRef = useRef(null);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
-  // Fetch videos from your API
   useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        console.log('Fetching videos from API...');
-        const response = await axios.get('http://192.168.1.76:5000/api/v1/all-videos');
-        console.log('API response:', response.data);
-        
-        if (response.data && response.data.videos) {
-          setVideos(response.data.videos);
-        } else {
-          console.error('Invalid video data format:', response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching videos:', error);
-      }
-    };
-
+    async function fetchVideos() {
+      const data = await getVideos();
+      console.log('Fetched videos:', data); // Log the fetched data
+      setVideos(data); // Set the fetched data
+    }
     fetchVideos();
   }, []);
 
-  // Detect the current visible video
-  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+  const handleViewableItemsChanged = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
-      const visibleItemIndex = viewableItems[0].index;
-      setCurrentVisibleVideoIndex(visibleItemIndex);
+      const newIndex = viewableItems[0].index;
+      setCurrentVideoIndex(newIndex);
     }
   });
 
   const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 50,  // 50% of the video must be visible to trigger play
+    itemVisiblePercentThreshold: 50,
   });
-
-  // Automatically play/stop videos based on visibility
-  useEffect(() => {
-    videoRefs.current.forEach((video, index) => {
-      if (video) {
-        if (index === currentVisibleVideoIndex) {
-          video.playAsync();
-        } else {
-          video.stopAsync();
-        }
-      }
-    });
-  }, [currentVisibleVideoIndex]);
-
-  // Handle play/pause when tapping the video
-  const handleVideoTap = (index) => {
-    const video = videoRefs.current[index];
-    if (video) {
-      video.getStatusAsync().then((status) => {
-        if (status.isPlaying) {
-          video.pauseAsync();
-        } else {
-          video.playAsync();
-        }
-      });
-    }
-  };
-
-  // Render each video in the list
-  const renderItem = ({ item, index }) => (
-    <TouchableWithoutFeedback onPress={() => handleVideoTap(index)}>
-      <View style={styles.videoContainer}>
-        <Video
-          ref={(ref) => {
-            videoRefs.current[index] = ref;
-          }}
-          source={{ uri: item.url }}
-          style={styles.video}
-          resizeMode="cover"
-          isLooping
-        />
-        {/* Overlay Text */}
-        <View style={styles.overlay}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.hashtags}>{item.hashtags.join(', ')}</Text>
-        </View>
-      </View>
-    </TouchableWithoutFeedback>
-  );
 
   return (
     <FlatList
+      ref={flatListRef}
       data={videos}
+      renderItem={({ item, index }) => (
+        <View style={styles.videoWrapper}>
+          {item ? ( // Ensure item is not undefined
+            <VideoContainer
+              videoUri={item.url} // Ensure we're accessing the correct URL
+              title={item.title}
+              description={item.description || 'No description available'}
+              likes={item.likes || 0}
+              comments={item.comments || 0}
+              shares={item.shares || 0}
+              isPlaying={index === currentVideoIndex} // Autoplay only the current video
+            />
+          ) : (
+            <Text style={styles.errorText}>No video data available</Text>
+          )}
+        </View>
+      )}
+      keyExtractor={(item) => item._id} // Ensure unique keys
+      snapToInterval={Dimensions.get('window').height}
+      decelerationRate="fast"
       pagingEnabled
-      renderItem={renderItem}
-      keyExtractor={(item) => item._id}
-      onViewableItemsChanged={onViewableItemsChanged.current}
-      viewabilityConfig={viewabilityConfig.current}
       showsVerticalScrollIndicator={false}
+      onViewableItemsChanged={handleViewableItemsChanged.current}
+      viewabilityConfig={viewabilityConfig.current}
     />
   );
 };
 
 const styles = StyleSheet.create({
-  videoContainer: {
-    height,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'black',
+  videoWrapper: {
+    height: Dimensions.get('window').height,
   },
-  video: {
-    width: '100%',
-    height: '100%',
-  },
-  overlay: {
-    position: 'absolute',
-    bottom: 20,
-    left: 10,
-  },
-  title: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  hashtags: {
-    color: 'lightgray',
-    fontSize: 14,
-    marginTop: 5,
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
