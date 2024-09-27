@@ -4,7 +4,7 @@ import { Avatar, Button } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import mime from 'mime';
 import Loader from '../components/Loader';
-import { logout, updateProfile } from '../redux/action';
+import { logout, updateProfile, loadUser } from '../redux/action';
 
 const Profile = ({ navigation, route }) => {
   const { user, loading } = useSelector((state) => state.auth);

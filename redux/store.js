@@ -4,6 +4,7 @@ import {
   messageReducer,
   userListingReducer,
   getListingReducer,
+  videoReducer,
 } from "./reducer";
 
 const store = configureStore({
@@ -12,6 +13,7 @@ const store = configureStore({
     message: messageReducer,
     userListing: userListingReducer,
     getListing: getListingReducer,
+    videos: videoReducer,
   },
 });
 

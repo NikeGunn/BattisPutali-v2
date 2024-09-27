@@ -223,6 +223,48 @@ export const getListingReducer = createReducer(
   }
 );
 
+export const videoReducer = createReducer(
+  {
+    videos: [], // Initial state for videos
+  },
+  {
+    // Upload Video Actions
+    uploadVideoRequest: (state) => {
+      state.loading = true;
+    },
+    uploadVideoSuccess: (state, action) => {
+      state.loading = false;
+      state.message = action.payload;
+    },
+    uploadVideoFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Fetch User Videos Actions
+    getUserVideosRequest: (state) => {
+      state.loading = true;
+    },
+    getUserVideosSuccess: (state, action) => {
+      state.loading = false;
+      state.videos = action.payload;
+    },
+    getUserVideosFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Clear Errors and Messages
+    clearError: (state) => {
+      state.error = null;
+    },
+    clearMessage: (state) => {
+      state.message = null;
+    },
+  }
+);
+
+
 //Add a UserListingReducer to redux/reducer.js
 export const userListingReducer = createReducer(
   {

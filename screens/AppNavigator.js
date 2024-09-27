@@ -1,9 +1,7 @@
 // AppNavigator.js
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
-import ItemDetails from "./ItemDetails";
-import PostItems from "./PostItems";
+import PostVideo from "./PostVideo";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,14 +18,8 @@ const AppNavigator = () => (
       },
     }}
   >
-    <Stack.Screen
-      name="ItemDetails"
-      component={ItemDetails}
-      options={({ route }) => ({
-        title: route.params.item.title,
-      })}
-    />
-    <Stack.Screen name="PostItems" component={PostItems} />
+  
+    <Stack.Screen name="PostVideo" component={PostVideo} />
   </Stack.Navigator>
 );
 

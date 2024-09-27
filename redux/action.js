@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const serverUrl = "http://192.168.1.76:4000/api/v1";
+const serverUrl = "http://192.168.1.76:5000/api/v1";
 
 //login action also need to hash the password
 export const login = (email, password) => async (dispatch) => {
@@ -318,6 +318,89 @@ export const postItem = (formData) => async (dispatch) => {
     });
   }
 };
+
+// Upload Video Action
+export const uploadVideo = (formData) => async (dispatch) => {
+  try {
+    dispatch({ type: 'uploadVideoRequest' });
+
+    const { data } = await axios.post(`${serverUrl}/upload`, formData,
+      { headers: 
+        { 'Content-Type': 'multipart/form-data' } 
+      });
+
+    dispatch({
+      type: 'uploadVideoSuccess',
+      payload: data.message,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'uploadVideoFailure',
+      payload: error.response?.data?.message || 'Video upload failed',
+    });
+  }
+};
+
+// Fetch User Videos Action
+export const getUserVideos = () => async (dispatch) => {
+  try {
+    dispatch({ type: 'getUserVideosRequest' });
+
+    const { data } = await axios.get(`${serverUrl}/my-videos`);
+
+    dispatch({
+      type: 'getUserVideosSuccess',
+      payload: data.videos,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'getUserVideosFailure',
+      payload: error.response?.data?.message || 'Failed to fetch videos',
+    });
+  }
+};
+
+
+// // Action types
+// export const FETCH_VIDEOS_REQUEST = "FETCH_VIDEOS_REQUEST";
+// export const FETCH_VIDEOS_SUCCESS = "FETCH_VIDEOS_SUCCESS";
+// export const FETCH_VIDEOS_FAILURE = "FETCH_VIDEOS_FAILURE";
+export const DELETE_VIDEO_REQUEST = "DELETE_VIDEO_REQUEST";
+export const DELETE_VIDEO_SUCCESS = "DELETE_VIDEO_SUCCESS";
+export const DELETE_VIDEO_FAILURE = "DELETE_VIDEO_FAILURE";
+
+// // Fetch all videos action
+// export const fetchVideos = () => async (dispatch) => {
+//   try {
+//     dispatch({ type: FETCH_VIDEOS_REQUEST });
+    
+//     const response = await axios.get(`${serverUrl}/all-videos`); // Corrected URL
+//     const videos = response.data.videos;
+
+//     dispatch({ type: FETCH_VIDEOS_SUCCESS, payload: videos });
+//   } catch (error) {
+//     dispatch({ 
+//       type: FETCH_VIDEOS_FAILURE, 
+//       payload: error.response ? error.response.data.message : "Network error" 
+//     });
+//   }
+// };
+
+
+// Delete video action
+export const deleteVideo = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: DELETE_VIDEO_REQUEST });
+
+    await axios.delete(`${serverUrl}/all-videos/${id}`); // Replace with your actual API endpoint
+
+    dispatch({ type: DELETE_VIDEO_SUCCESS, payload: id });
+  } catch (error) {
+    dispatch({ type: DELETE_VIDEO_FAILURE, payload: error.response.data.message });
+  }
+};
+
+
 
 export const FETCH_USER_LISTINGS_REQUEST = "FETCH_USER_LISTINGS_REQUEST";
 export const FETCH_USER_LISTINGS_SUCCESS = "FETCH_USER_LISTINGS_SUCCESS";
