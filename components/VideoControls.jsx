@@ -1,27 +1,76 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList, Image, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
 
-const VideoControls = ({ likes, comments, shares }) => {
+const VideoControls = ({ initialLikes, comments, shares }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [likeCount, setLikeCount] = useState(initialLikes); // State to manage the like count
+  const [liked, setLiked] = useState(false); // State to manage whether the user has liked the video
+  const { user } = useSelector((state) => state.auth); // Get user data from Redux
+
+  const commentData = [
+    { id: '1', text: 'Great video!' },
+    { id: '2', text: 'I love this!' },
+    // More comment data here
+  ];
+
+  const renderComment = ({ item }) => (
+    <View style={styles.commentItem}>
+      <Text style={styles.commentText}>{item.text}</Text>
+    </View>
+  );
+
+  const handleLikeClick = () => {
+    // Toggle like status and update like count
+    const newCount = liked ? likeCount - 1 : likeCount + 1;
+    setLikeCount(newCount); // Update like count
+    setLiked(!liked); // Toggle liked state
+  };
+
+  const handleShareClick = () => {
+    // Placeholder for share functionality
+    Alert.alert('Share', 'Share functionality will be implemented here!');
+  };
+
   return (
     <View style={styles.controlsContainer}>
-      {/* Like Button */}
+      {/* Profile Button */}
       <TouchableOpacity style={styles.controlButton}>
-        <FontAwesome name="heart" size={30} color="white" />
-        <Text style={styles.controlText}>{likes}</Text>
+        <Image source={{ uri: user.avatar.url }} style={styles.profileImage} />
+      </TouchableOpacity>
+
+      {/* Like Button */}
+      <TouchableOpacity style={styles.controlButton} onPress={handleLikeClick}>
+        <FontAwesome name="heart" size={30} color={liked ? 'red' : 'white'} />
+        <Text style={styles.controlText}>{likeCount}</Text>
       </TouchableOpacity>
 
       {/* Comment Button */}
-      <TouchableOpacity style={styles.controlButton}>
+      <TouchableOpacity style={styles.controlButton} onPress={() => setModalVisible(true)}>
         <FontAwesome name="comment" size={30} color="white" />
         <Text style={styles.controlText}>{comments}</Text>
       </TouchableOpacity>
 
       {/* Share Button */}
-      <TouchableOpacity style={styles.controlButton}>
+      <TouchableOpacity style={styles.controlButton} onPress={handleShareClick}>
         <FontAwesome name="share" size={30} color="white" />
         <Text style={styles.controlText}>{shares}</Text>
       </TouchableOpacity>
+
+      {/* Comments Modal */}
+      <Modal visible={modalVisible} animationType="slide">
+        <View style={styles.modalContainer}>
+          <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+          <FlatList
+            data={commentData}
+            renderItem={renderComment}
+            keyExtractor={(item) => item.id}
+          />
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -41,6 +90,38 @@ const styles = StyleSheet.create({
     color: 'white',
     marginTop: 5,
     fontSize: 14,
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: 'white',
+    marginBottom: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#F9F9F9',
+  },
+  closeButton: {
+    alignItems: 'flex-end',
+    marginBottom: 20,
+  },
+  closeButtonText: {
+    color: '#FF4D4D',
+    fontWeight: 'bold',
+  },
+  commentItem: {
+    backgroundColor: '#FFFFFF',
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 8,
+    elevation: 1,
+  },
+  commentText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
 

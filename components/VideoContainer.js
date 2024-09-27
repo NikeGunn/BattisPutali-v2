@@ -1,28 +1,29 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image } from 'react-native';
 import { Video } from 'expo-av';
 import VideoControls from './VideoControls';
 
-const VideoContainer = ({ videoUri, title, description, likes, comments, shares, isPlaying }) => {
+const VideoContainer = ({ videoUri, title, description, hashtags, isPlaying, video }) => {
   const videoRef = useRef(null);
-  const [playIconVisible, setPlayIconVisible] = React.useState(true); // State to manage play icon visibility
+  const [playIconVisible, setPlayIconVisible] = useState(true);
+  const [isFollowed, setIsFollowed] = useState(false); // State to manage follow status
 
   useEffect(() => {
     const manageVideoPlayback = async () => {
       if (isPlaying) {
         await videoRef.current.playAsync();
-        setPlayIconVisible(false); // Hide the play icon when video is playing
+        setPlayIconVisible(false);
       } else {
         await videoRef.current.pauseAsync();
-        setPlayIconVisible(true); // Show the play icon when video is paused
+        setPlayIconVisible(true);
       }
     };
     manageVideoPlayback();
-  }, [isPlaying]); // Effect will run when isPlaying changes
+  }, [isPlaying]);
 
   const handlePlaybackStatusUpdate = useCallback(async (status) => {
     if (status.didJustFinish) {
-      await videoRef.current.replayAsync(); // Restart the video when it finishes
+      await videoRef.current.replayAsync();
     }
   }, []);
 
@@ -37,6 +38,11 @@ const VideoContainer = ({ videoUri, title, description, likes, comments, shares,
     }
   };
 
+  // Follow/Unfollow button handler
+  const toggleFollow = () => {
+    setIsFollowed((prev) => !prev);
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={handlePress} style={styles.videoContainer}>
@@ -47,14 +53,14 @@ const VideoContainer = ({ videoUri, title, description, likes, comments, shares,
           volume={1.0}
           isMuted={false}
           resizeMode="cover"
-          shouldPlay={isPlaying} // Use isPlaying to control the video
+          shouldPlay={isPlaying}
           style={styles.video}
-          onPlaybackStatusUpdate={handlePlaybackStatusUpdate} // Listen for playback status updates
+          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
         />
         {playIconVisible && (
           <View style={styles.playIconContainer}>
             <Image
-              source={require('../assets/icon/play.png')} // Replace with your play icon
+              source={require('../assets/icon/play.png')}
               style={styles.playIcon}
             />
           </View>
@@ -63,12 +69,33 @@ const VideoContainer = ({ videoUri, title, description, likes, comments, shares,
 
       {/* Video Details */}
       <View style={styles.textContainer}>
-        <Text style={styles.title}>{title}</Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>{title}</Text>
+          <TouchableOpacity 
+            style={isFollowed ? styles.unfollowButton : styles.followButton} 
+            onPress={toggleFollow}
+          >
+            <Text style={styles.followButtonText}>
+              {isFollowed ? 'Unfollow' : 'Follow'}
+            </Text>
+          </TouchableOpacity>
+        </View>
         <Text style={styles.description}>{description}</Text>
+        <View style={styles.hashtagsContainer}>
+          {hashtags.map((hashtag, index) => (
+            <Text key={index} style={styles.hashtag}>
+              {hashtag}
+            </Text>
+          ))}
+        </View>
       </View>
 
       {/* Video Controls */}
-      <VideoControls likes={likes} comments={comments} shares={shares} />
+      <VideoControls
+        initialLikes={video?.likes || 0}
+        comments={video?.comments || 0}
+        shares={video?.shares || 0}
+      />
     </View>
   );
 };
@@ -94,14 +121,49 @@ const styles = StyleSheet.create({
     bottom: 50,
     left: 20,
   },
+  titleContainer: {
+    flexDirection: 'row', // Align title and button horizontally
+    alignItems: 'center', // Center vertically
+    marginBottom: 7, // Space between title and description
+  },
   title: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
+    flex: 1, // Take available space
+  },
+  followButton: {
+    backgroundColor: '#FF2D55', // Follow button color
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginLeft: 10, // Space between title and button
+  },
+  unfollowButton: {
+    backgroundColor: '#000', // Unfollow button color
+    borderColor: '#FF2D55',
+    borderWidth: 1,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginLeft: 10, // Space between title and button
+  },
+  followButtonText: {
+    color: '#fff', // Text color
+    fontSize: 14,
   },
   description: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 18,
+  },
+  hashtagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  hashtag: {
+    color: '#fff',
+    fontSize: 16,
+    marginRight: 5,
   },
   playIconContainer: {
     position: 'absolute',
@@ -116,7 +178,7 @@ const styles = StyleSheet.create({
   playIcon: {
     width: 80,
     height: 80,
-    tintColor: '#fff', // Optional: change the color of the play icon
+    tintColor: '#fff',
   },
 });
 

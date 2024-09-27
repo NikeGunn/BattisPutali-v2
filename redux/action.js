@@ -190,24 +190,56 @@ export const logout = () => async (dispatch) => {
     });
   }
 };
-
 export const register = (formData) => async (dispatch) => {
   try {
-    dispatch({ type: "registerRequest" });
-
-    const { data } = await axios.post(`${serverUrl}/register`, formData, {
+    const config = {
       headers: {
-        "Content-Type": "multipart/form-data",
+        'Content-Type': 'multipart/form-data',
       },
-    });
-    dispatch({ type: "registerSuccess", payload: data });
+    };
+
+    const response = await axios.post(`${serverUrl}/register`, formData, config);
+
+    // Assuming the response has a success property
+    if (response.data.success) {
+      dispatch({
+        type: 'REGISTER_SUCCESS',
+        payload: response.data, // Store the response in the state if needed
+      });
+      return true; // Indicate success
+    } else {
+      dispatch({
+        type: 'REGISTER_FAIL',
+        payload: response.data.message,
+      });
+      return false; // Indicate failure
+    }
   } catch (error) {
     dispatch({
-      type: "registerFailure",
-      payload: error.response.data.message,
+      type: 'REGISTER_FAIL',
+      payload: error.response.data.message || 'Registration failed',
     });
+    return false; // Indicate failure
   }
 };
+
+// export const register = (formData) => async (dispatch) => {
+//   try {
+//     dispatch({ type: "registerRequest" });
+
+//     const { data } = await axios.post(`${serverUrl}/register`, formData, {
+//       headers: {
+//         "Content-Type": "multipart/form-data",
+//       },
+//     });
+//     dispatch({ type: "registerSuccess", payload: data });
+//   } catch (error) {
+//     dispatch({
+//       type: "registerFailure",
+//       payload: error.response.data.message,
+//     });
+//   }
+// };
 
 export const updatePassword =
   (oldPassword, newPassword) => async (dispatch) => {

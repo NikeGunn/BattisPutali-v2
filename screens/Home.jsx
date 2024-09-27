@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { FlatList, StyleSheet, View, Dimensions, Text } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { FlatList, StyleSheet, View, Dimensions, Text, RefreshControl } from 'react-native';
 import VideoContainer from '../components/VideoContainer';
 import { getVideos } from '../components/api';
 
 const Home = () => {
   const [videos, setVideos] = useState([]);
+  const [refreshing, setRefreshing] = useState(false); // New state for refresh control
   const flatListRef = useRef(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
+  const fetchVideos = async () => {
+    const data = await getVideos();
+    console.log('Fetched videos:', data); // Log the fetched data
+    setVideos(data); // Set the fetched data
+  };
+
   useEffect(() => {
-    async function fetchVideos() {
-      const data = await getVideos();
-      console.log('Fetched videos:', data); // Log the fetched data
-      setVideos(data); // Set the fetched data
-    }
     fetchVideos();
   }, []);
 
@@ -28,20 +30,28 @@ const Home = () => {
     itemVisiblePercentThreshold: 50,
   });
 
+  // Function to handle pull-to-refresh
+  const onRefresh = async () => {
+    setRefreshing(true); // Show the refreshing spinner
+    await fetchVideos(); // Refetch videos
+    setRefreshing(false); // Hide the refreshing spinner after fetching data
+  };
+
   return (
     <FlatList
       ref={flatListRef}
       data={videos}
       renderItem={({ item, index }) => (
         <View style={styles.videoWrapper}>
-          {item ? ( // Ensure item is not undefined
+          {item ? (
             <VideoContainer
-              videoUri={item.url} // Ensure we're accessing the correct URL
+              videoUri={item.url}
               title={item.title}
               description={item.description || 'No description available'}
               likes={item.likes || 0}
               comments={item.comments || 0}
               shares={item.shares || 0}
+              hashtags={item.hashtags || []}
               isPlaying={index === currentVideoIndex} // Autoplay only the current video
             />
           ) : (
@@ -56,6 +66,9 @@ const Home = () => {
       showsVerticalScrollIndicator={false}
       onViewableItemsChanged={handleViewableItemsChanged.current}
       viewabilityConfig={viewabilityConfig.current}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      } // Add RefreshControl here
     />
   );
 };
