@@ -1,5 +1,16 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, Alert, TouchableOpacity, StatusBar, Platform } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Alert,
+  TouchableOpacity,
+  StatusBar,
+  Platform,
+  FlatList,
+  Animated,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserVideos, logout } from '../redux/action'; // Ensure this path is correct
 import Loader from '../components/Loader'; // Ensure this component exists
@@ -10,8 +21,16 @@ const Profile = ({ navigation }) => {
   const { videos, loading } = useSelector((state) => state.videos);
   const { user } = useSelector((state) => state.auth); // Assuming user data is in auth state
 
+  const fadeAnim = useRef(new Animated.Value(0)).current; // Initial value for opacity: 0
+
   useEffect(() => {
     dispatch(getUserVideos());
+    // Animate fade-in effect when videos are loaded
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
   }, [dispatch]);
 
   const confirmLogout = () => {
@@ -38,8 +57,25 @@ const Profile = ({ navigation }) => {
     return <Loader />;
   }
 
+  const renderVideoItem = ({ item }) => (
+    <Animated.View style={[styles.videoItem, { opacity: fadeAnim }]}>
+      <Video
+        source={{ uri: item.url }}
+        style={styles.video}
+        shouldPlay
+        isLooping
+        isMuted
+        resizeMode="cover"
+      />
+      <View style={styles.videoTitle}>
+        <Text>{item.title}</Text>
+        <Text>#{item.hashtags.join(', ')}</Text>
+      </View>
+    </Animated.View>
+  );
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <View style={styles.profileHeader}>
         <Image source={{ uri: user.avatar.url }} style={styles.avatar} />
         <View style={styles.profileStats}>
@@ -57,28 +93,14 @@ const Profile = ({ navigation }) => {
       </View>
 
       <Text style={styles.header}>My Videos</Text>
-      <View style={styles.videoGrid}>
-        {videos.length > 0 ? (
-          videos.map((video) => (
-            <View key={video._id} style={styles.videoItem}>
-              <Video
-                source={{ uri: video.url }}
-                style={styles.video}
-                shouldPlay
-                isLooping
-                isMuted
-                resizeMode="cover"
-              />
-              <View style={styles.videoTitle}>
-              <Text>{video.title}</Text>
-              <Text>#{video.hashtags}</Text>
-              </View>
-            </View>
-          ))
-        ) : (
-          <Text style={styles.noVideosText}>No videos found.</Text>
-        )}
-      </View>
+
+      <FlatList
+        data={videos}
+        renderItem={renderVideoItem}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={styles.videoGrid}
+        numColumns={2} // Adjusts to a 2-column layout
+      />
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('changepassword')}>
@@ -88,13 +110,13 @@ const Profile = ({ navigation }) => {
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
     padding: 22,
     backgroundColor: '#F9F9F9',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
@@ -138,11 +160,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 20,
-    // alignSelf: 'center',
   },
   videoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexGrow: 1,
     justifyContent: 'space-between',
   },
   videoItem: {
@@ -167,14 +187,7 @@ const styles = StyleSheet.create({
     padding: 5,
     backgroundColor: '#F0F0F0', // Light background for title
     textAlign: 'center',
-    alignItems : 'center',
     color: '#333',
-  },
-  noVideosText: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: '#999',
-    marginTop: 20,
   },
   buttonContainer: {
     marginTop: 20,

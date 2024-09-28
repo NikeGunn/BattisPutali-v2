@@ -1,35 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList, Image, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 
-const VideoControls = ({ initialLikes, comments, shares }) => {
+const VideoControls = React.memo(({ initialLikes, comments, shares }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [likeCount, setLikeCount] = useState(initialLikes); // State to manage the like count
-  const [liked, setLiked] = useState(false); // State to manage whether the user has liked the video
-  const { user } = useSelector((state) => state.auth); // Get user data from Redux
+  const [likeCount, setLikeCount] = useState(initialLikes);
+  const [liked, setLiked] = useState(false);
+  const { user } = useSelector((state) => state.auth);
 
   const commentData = [
     { id: '1', text: 'Great video!' },
     { id: '2', text: 'I love this!' },
-    // More comment data here
   ];
 
-  const renderComment = ({ item }) => (
+  const renderComment = useCallback(({ item }) => (
     <View style={styles.commentItem}>
       <Text style={styles.commentText}>{item.text}</Text>
     </View>
-  );
+  ), []);
 
   const handleLikeClick = () => {
-    // Toggle like status and update like count
     const newCount = liked ? likeCount - 1 : likeCount + 1;
-    setLikeCount(newCount); // Update like count
-    setLiked(!liked); // Toggle liked state
+    setLikeCount(newCount);
+    setLiked(!liked);
   };
 
   const handleShareClick = () => {
-    // Placeholder for share functionality
     Alert.alert('Share', 'Share functionality will be implemented here!');
   };
 
@@ -37,7 +34,10 @@ const VideoControls = ({ initialLikes, comments, shares }) => {
     <View style={styles.controlsContainer}>
       {/* Profile Button */}
       <TouchableOpacity style={styles.controlButton}>
-        <Image source={{ uri: user.avatar.url }} style={styles.profileImage} />
+        <Image
+          source={{ uri: user?.avatar?.url || 'https://via.placeholder.com/150' }}
+          style={styles.profileImage}
+        />
       </TouchableOpacity>
 
       {/* Like Button */}
@@ -68,12 +68,15 @@ const VideoControls = ({ initialLikes, comments, shares }) => {
             data={commentData}
             renderItem={renderComment}
             keyExtractor={(item) => item.id}
+            initialNumToRender={5}
+            maxToRenderPerBatch={5}
+            windowSize={7}
           />
         </View>
       </Modal>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   controlsContainer: {
