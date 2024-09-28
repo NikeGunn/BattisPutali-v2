@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const serverUrl = "http://192.168.1.76:5000/api/v1";
+const serverUrl = "http://192.168.1.65:5000/api/v1";
 
 //login action also need to hash the password
 export const login = (email, password) => async (dispatch) => {

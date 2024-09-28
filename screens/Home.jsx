@@ -9,15 +9,28 @@ const Home = () => {
   const flatListRef = useRef(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
+  // Fisher-Yates (Knuth) Shuffle algorithm to shuffle an array
+  const shuffleArray = (array) => {
+    let shuffledArray = [...array];
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+    }
+    return shuffledArray;
+  };
+
   // Fetch videos from API
   const fetchVideos = async () => {
     const data = await getVideos();
     console.log('Fetched videos:', data);
-    setVideos(data); // Set the fetched data
+
+    // Shuffle the fetched videos
+    const shuffledVideos = shuffleArray(data);
+    setVideos(shuffledVideos); // Set the shuffled data
   };
 
   useEffect(() => {
-    fetchVideos();
+    fetchVideos(); // Fetch and shuffle videos on initial load
   }, []);
 
   // Memoize the viewableItemsChanged callback to avoid unnecessary renders
@@ -35,29 +48,32 @@ const Home = () => {
   // Function to handle pull-to-refresh
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchVideos(); // Refetch videos
+    await fetchVideos(); // Refetch and reshuffle videos
     setRefreshing(false);
   };
 
   // Memoize the renderItem function for better performance
-  const renderItem = useCallback(({ item, index }) => (
-    <View style={styles.videoWrapper}>
-      {item ? (
-        <VideoContainer
-          videoUri={item.url}
-          title={item.title}
-          description={item.description || 'No description available'}
-          likes={item.likes || 0}
-          comments={item.comments || 0}
-          shares={item.shares || 0}
-          hashtags={item.hashtags || []}
-          isPlaying={index === currentVideoIndex} // Autoplay only the current video
-        />
-      ) : (
-        <Text style={styles.errorText}>No video data available</Text>
-      )}
-    </View>
-  ), [currentVideoIndex]);
+  const renderItem = useCallback(
+    ({ item, index }) => (
+      <View style={styles.videoWrapper}>
+        {item ? (
+          <VideoContainer
+            videoUri={item.url}
+            title={item.title}
+            description={item.description || 'No description available'}
+            likes={item.likes || 0}
+            comments={item.comments || 0}
+            shares={item.shares || 0}
+            hashtags={item.hashtags || []}
+            isPlaying={index === currentVideoIndex} // Autoplay only the current video
+          />
+        ) : (
+          <Text style={styles.errorText}>No video data available</Text>
+        )}
+      </View>
+    ),
+    [currentVideoIndex]
+  );
 
   return (
     <FlatList

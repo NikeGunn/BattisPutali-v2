@@ -1,37 +1,26 @@
-import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Alert,
-  TouchableOpacity,
-  StatusBar,
-  Platform,
-  FlatList,
-  Animated,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, Alert, TouchableOpacity, StatusBar, Platform, RefreshControl } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserVideos, logout } from '../redux/action'; // Ensure this path is correct
 import Loader from '../components/Loader'; // Ensure this component exists
 import { Video } from 'expo-av';
+import { FontAwesome } from '@expo/vector-icons'; // Add this for icons
 
 const Profile = ({ navigation }) => {
   const dispatch = useDispatch();
   const { videos, loading } = useSelector((state) => state.videos);
   const { user } = useSelector((state) => state.auth); // Assuming user data is in auth state
-
-  const fadeAnim = useRef(new Animated.Value(0)).current; // Initial value for opacity: 0
+  const [refreshing, setRefreshing] = useState(false); // State for refreshing
 
   useEffect(() => {
-    dispatch(getUserVideos());
-    // Animate fade-in effect when videos are loaded
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
+    fetchUserVideos(); // Fetch videos on component mount
   }, [dispatch]);
+
+  const fetchUserVideos = async () => {
+    setRefreshing(true); // Start refreshing
+    await dispatch(getUserVideos());
+    setRefreshing(false); // Stop refreshing
+  };
 
   const confirmLogout = () => {
     Alert.alert(
@@ -57,25 +46,13 @@ const Profile = ({ navigation }) => {
     return <Loader />;
   }
 
-  const renderVideoItem = ({ item }) => (
-    <Animated.View style={[styles.videoItem, { opacity: fadeAnim }]}>
-      <Video
-        source={{ uri: item.url }}
-        style={styles.video}
-        shouldPlay
-        isLooping
-        isMuted
-        resizeMode="cover"
-      />
-      <View style={styles.videoTitle}>
-        <Text>{item.title}</Text>
-        <Text>#{item.hashtags.join(', ')}</Text>
-      </View>
-    </Animated.View>
-  );
-
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={fetchUserVideos} /> // Pull to refresh implementation
+      }
+    >
       <View style={styles.profileHeader}>
         <Image source={{ uri: user.avatar.url }} style={styles.avatar} />
         <View style={styles.profileStats}>
@@ -93,14 +70,38 @@ const Profile = ({ navigation }) => {
       </View>
 
       <Text style={styles.header}>My Videos</Text>
-
-      <FlatList
-        data={videos}
-        renderItem={renderVideoItem}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.videoGrid}
-        numColumns={2} // Adjusts to a 2-column layout
-      />
+      <View style={styles.videoGrid}>
+        {videos.length > 0 ? (
+          videos.map((video) => (
+            <View key={video._id} style={styles.videoItem}>
+              <Video
+                source={{ uri: video.url }}
+                style={styles.video}
+                shouldPlay
+                isLooping
+                isMuted
+                resizeMode="cover"
+              />
+              <View style={styles.videoTitle}>
+                <Text>{video.title}</Text>
+                <Text>#{video.hashtags}</Text>
+              </View>
+              <View style={styles.statsContainer}>
+                <View style={styles.statItem}>
+                  <FontAwesome name="thumbs-up" size={16} color="#FFF" />
+                  <Text style={styles.statText}>1.5K</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <FontAwesome name="eye" size={16} color="#FFF" />
+                  <Text style={styles.statText}>5.2K</Text>
+                </View>
+              </View>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noVideosText}>No videos found.</Text>
+        )}
+      </View>
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('changepassword')}>
@@ -110,13 +111,13 @@ const Profile = ({ navigation }) => {
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 22,
     backgroundColor: '#F9F9F9',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
@@ -162,7 +163,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   videoGrid: {
-    flexGrow: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
   videoItem: {
@@ -176,6 +178,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    position: 'relative', // Added for absolute positioning of stats
   },
   video: {
     width: '100%',
@@ -188,6 +191,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F0F0', // Light background for title
     textAlign: 'center',
     color: '#333',
+  },
+  noVideosText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#999',
+    marginTop: 20,
   },
   buttonContainer: {
     marginTop: 20,
@@ -206,6 +215,26 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  statsContainer: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 5,
+    padding: 5,
+    marginVertical: 45,
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  statText: {
+    color: '#FFF',
+    marginLeft: 4,
+    fontSize: 14,
   },
 });
 

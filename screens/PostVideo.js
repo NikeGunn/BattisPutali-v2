@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadVideo, getUserVideos } from '../redux/action';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Video } from 'expo-av';
 
 const PostVideo = () => {
   const [videoUri, setVideoUri] = useState('');
   const [title, setTitle] = useState('');
   const [hashtags, setHashtags] = useState('');
   const [uploading, setUploading] = useState(false);
+  const videoRef = useRef(null); // Reference for the Video component
 
   const dispatch = useDispatch();
   const { loading, message, error, videos } = useSelector(state => state.videos);
@@ -36,6 +38,9 @@ const PostVideo = () => {
 
       if (!result.canceled) {
         setVideoUri(result.assets[0].uri);
+        if (videoRef.current) {
+          await videoRef.current.playAsync(); // Autoplay the selected video
+        }
       } else {
         Alert.alert('No video selected');
       }
@@ -69,6 +74,14 @@ const PostVideo = () => {
     }
   };
 
+  // Function to handle playback status updates
+  const onPlaybackStatusUpdate = async (status) => {
+    if (status.didJustFinish) {
+      // Restart the video when it finishes
+      await videoRef.current.replayAsync();
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Create Your Video</Text>
@@ -82,7 +95,24 @@ const PostVideo = () => {
       />
 
       {videoUri ? (
-        <Image source={{ uri: videoUri }} style={styles.videoThumbnail} />
+        <View style={styles.videoContainer}>
+          <Video
+            ref={videoRef}
+            source={{ uri: videoUri }}
+            rate={1.0}
+            volume={1.0} // Set volume to 1 for sound
+            isMuted={false} // Ensure it plays with sound
+            isLooping={false} // Disable looping in the Video component
+            resizeMode="cover"
+            shouldPlay // Autoplay when loaded
+            style={styles.videoThumbnail}
+            onPlaybackStatusUpdate={onPlaybackStatusUpdate} // Update playback status
+            onError={(error) => {
+              console.error(error);
+              Alert.alert('Error', 'Failed to play video');
+            }}
+          />
+        </View>
       ) : (
         <Text style={styles.placeholderText}>No video selected</Text>
       )}
@@ -129,7 +159,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#FF2D55', // Title color for a vibrant look
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -144,11 +174,15 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
   },
+  videoContainer: {
+    borderRadius: 15,
+    overflow: 'hidden', // Ensure rounded corners
+    marginBottom: 20,
+  },
   videoThumbnail: {
     width: '100%',
     height: 200,
     borderRadius: 15,
-    marginBottom: 20,
   },
   placeholderText: {
     color: '#888',
@@ -170,6 +204,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF0044', // Bold red for upload button
     borderRadius: 25,
     height: 50,
+    justifyContent: 'center',
+    overflow: 'hidden', // Ensure rounded corners
   },
   uploadButtonContainer: {
     marginTop: 20,
@@ -178,7 +214,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     textAlign: 'center',
-    color: '#fff',
+    color: '#FF2D55', // Change loading text color
     marginTop: 10,
   },
 });

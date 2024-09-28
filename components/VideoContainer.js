@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Pressable, Image } from 'react-native';
 import { Video } from 'expo-av';
+import { useFocusEffect } from '@react-navigation/native'; // Importing useFocusEffect
 import VideoControls from './VideoControls';
 
 const VideoContainer = ({ videoUri, title, description, hashtags, isPlaying, video }) => {
@@ -8,6 +9,7 @@ const VideoContainer = ({ videoUri, title, description, hashtags, isPlaying, vid
   const [playIconVisible, setPlayIconVisible] = useState(true);
   const [isFollowed, setIsFollowed] = useState(false); // State to manage follow status
 
+  // Effect to manage video playback
   useEffect(() => {
     const manageVideoPlayback = async () => {
       if (isPlaying) {
@@ -43,9 +45,28 @@ const VideoContainer = ({ videoUri, title, description, hashtags, isPlaying, vid
     setIsFollowed((prev) => !prev);
   };
 
+  // Use focus effect to handle video playback on screen focus
+  useFocusEffect(
+    useCallback(() => {
+      const resumeVideoPlayback = async () => {
+        if (videoRef.current && isPlaying) {
+          await videoRef.current.playAsync();
+          setPlayIconVisible(false);
+        }
+      };
+
+      // Pause the video when the screen loses focus
+      return () => {
+        if (videoRef.current) {
+          videoRef.current.pauseAsync(); // Automatically pause when leaving
+        }
+      };
+    }, [isPlaying])
+  );
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={handlePress} style={styles.videoContainer}>
+      <Pressable onPress={handlePress} style={styles.videoContainer}>
         <Video
           ref={videoRef}
           source={{ uri: videoUri }}
@@ -65,20 +86,20 @@ const VideoContainer = ({ videoUri, title, description, hashtags, isPlaying, vid
             />
           </View>
         )}
-      </TouchableOpacity>
+      </Pressable>
 
       {/* Video Details */}
       <View style={styles.textContainer}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{title}</Text>
-          <TouchableOpacity 
-            style={isFollowed ? styles.unfollowButton : styles.followButton} 
+          <Pressable
+            style={isFollowed ? styles.unfollowButton : styles.followButton}
             onPress={toggleFollow}
           >
             <Text style={styles.followButtonText}>
               {isFollowed ? 'Unfollow' : 'Follow'}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <Text style={styles.description}>{description}</Text>
         <View style={styles.hashtagsContainer}>

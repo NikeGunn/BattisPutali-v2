@@ -1,13 +1,14 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList, Image, Alert } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList, Image, Alert, Share } from 'react-native';
+import { FontAwesome, Entypo } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 
-const VideoControls = React.memo(({ initialLikes, comments, shares }) => {
+const VideoControls = React.memo(({ initialLikes, comments, shares, videoUrl, videoTitle }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [likeCount, setLikeCount] = useState(initialLikes);
   const [liked, setLiked] = useState(false);
   const { user } = useSelector((state) => state.auth);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const commentData = [
     { id: '1', text: 'Great video!' },
@@ -26,8 +27,26 @@ const VideoControls = React.memo(({ initialLikes, comments, shares }) => {
     setLiked(!liked);
   };
 
-  const handleShareClick = () => {
-    Alert.alert('Share', 'Share functionality will be implemented here!');
+  const handleShareClick = async () => {
+    try {
+      const result = await Share.share({
+        message: `Check out this video: ${videoTitle}\n${videoUrl}`,
+        url: videoUrl,
+        title: videoTitle,
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          Alert.alert('Shared with', result.activityType);
+        } else {
+          Alert.alert('Video shared successfully!');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        Alert.alert('Share dismissed');
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   return (
@@ -58,6 +77,12 @@ const VideoControls = React.memo(({ initialLikes, comments, shares }) => {
         <Text style={styles.controlText}>{shares}</Text>
       </TouchableOpacity>
 
+      {/* Three-Dot (More Options) Button */}
+      <TouchableOpacity style={styles.controlButton} >
+        <Entypo name="dots-three-vertical" size={30} color="white" />
+      </TouchableOpacity>
+
+
       {/* Comments Modal */}
       <Modal visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
@@ -81,13 +106,13 @@ const VideoControls = React.memo(({ initialLikes, comments, shares }) => {
 const styles = StyleSheet.create({
   controlsContainer: {
     position: 'absolute',
-    right: 10,
-    bottom: 100,
+    right: 10, // Align to the right side
+    bottom: 65, // Adjust to be just above the footer
     alignItems: 'center',
   },
   controlButton: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 20, // Spacing between buttons
   },
   controlText: {
     color: 'white',
@@ -95,12 +120,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 45,
+    height: 45,
+    borderRadius: 25,
     borderWidth: 2,
     borderColor: 'white',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   modalContainer: {
     flex: 1,
@@ -125,6 +150,20 @@ const styles = StyleSheet.create({
   commentText: {
     fontSize: 16,
     color: '#333',
+  },
+  menuContainer: {
+    position: 'absolute',
+    backgroundColor: '#333',
+    padding: 10,
+    borderRadius: 5,
+    top: -60,
+    right: 50,
+    zIndex: 1,
+  },
+  menuItem: {
+    color: 'white',
+    fontSize: 16,
+    paddingVertical: 5,
   },
 });
 
