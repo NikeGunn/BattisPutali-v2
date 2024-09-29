@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadVideo, getUserVideos } from '../redux/action';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Video } from 'expo-av';
+import { Video } from 'expo-av'; // Import Video component
 
 const PostVideo = () => {
   const [videoUri, setVideoUri] = useState('');
@@ -74,14 +74,6 @@ const PostVideo = () => {
     }
   };
 
-  // Function to handle playback status updates
-  const onPlaybackStatusUpdate = async (status) => {
-    if (status.didJustFinish) {
-      // Restart the video when it finishes
-      await videoRef.current.replayAsync();
-    }
-  };
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Create Your Video</Text>
@@ -100,13 +92,11 @@ const PostVideo = () => {
             ref={videoRef}
             source={{ uri: videoUri }}
             rate={1.0}
-            volume={1.0} // Set volume to 1 for sound
-            isMuted={false} // Ensure it plays with sound
-            isLooping={false} // Disable looping in the Video component
+            volume={1.0}
+            isMuted={false}
             resizeMode="cover"
-            shouldPlay // Autoplay when loaded
+            shouldPlay={true} // Autoplay
             style={styles.videoThumbnail}
-            onPlaybackStatusUpdate={onPlaybackStatusUpdate} // Update playback status
             onError={(error) => {
               console.error(error);
               Alert.alert('Error', 'Failed to play video');
@@ -204,8 +194,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF0044', // Bold red for upload button
     borderRadius: 25,
     height: 50,
-    justifyContent: 'center',
-    overflow: 'hidden', // Ensure rounded corners
   },
   uploadButtonContainer: {
     marginTop: 20,
