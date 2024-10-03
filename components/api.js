@@ -1,6 +1,6 @@
 export const getVideos = async () => {
   try {
-    const response = await fetch('http://192.168.1.76:5000/api/v1/all-videos');
+    const response = await fetch('https://battis-putali.vercel.app/api/v1/all-videos');
     const result = await response.json();  // Parse the JSON response
     if (result.success && result.videos) {
       // If the response contains videos, return them

@@ -14,7 +14,6 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    
     "ios": {
       "supportsTablet": true
     },
@@ -22,10 +21,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.nautiluscode.battisputali"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2fdb6f08-ec7a-4352-bedc-8021b5515591"
+      }
     }
   }
 }
