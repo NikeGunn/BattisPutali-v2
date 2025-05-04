@@ -1,41 +1,118 @@
-# BattisPutali
+<div align="center">
+   <img src="https://github.com/NikeGunn/imagess/blob/main/BATTISPUTALI-ASSETS/battisputali-nikhil-bhagat-developer.gif?raw=true" alt="BattisPutali App Demo" width="320">
 
-BattisPutali is an innovative short-form video creation platform that draws inspiration from TikTok, YouTube Shorts, and Facebook Reels. Designed for the modern creator, the app enables users to effortlessly create, share, and discover viral videos, all while seamlessly integrating cultural elements that resonate with Nepalese users and the global community.
+   # BATTISPUTALI
 
----
+   *The Next Generation Short-Form Video Platform*
 
-## Features
+   [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
+   [![Made with React Native](https://img.shields.io/badge/React_Native-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
+   [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com/)
+</div>
 
-- **Infinite Scrolling Video Feed:** Seamless video scrolling, ensuring uninterrupted content consumption similar to TikTok’s experience.
-- **Hybrid Recommendation System:** Personalized content discovery using advanced algorithms combining collaborative and content-based filtering.
-- **Professional UI/UX:** A sleek, user-friendly interface designed to engage users with professional-level design aesthetics.
-- **User Profiles:** Showcase follower stats, likes, and other key metrics with dynamic, TikTok-like profile pages.
-- **Video Creation Tools:** Empower creators with intuitive tools to produce viral content easily.
-- **Real-Time Engagement Metrics:** Monitor likes, comments, and shares in real time, keeping users informed on their video performance.
+<br>
 
----
+## 👋 Introduction
 
-## Screenshots
+**BattisPutali** combines the best of TikTok, YouTube Shorts, and Facebook Reels into one seamless experience. Our platform empowers creators to express themselves while celebrating cultural diversity.
 
-| **App Screens**                                                                                                                                      |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![Screenshot 1](https://github.com/NikeGunn/admin_-their_assets/blob/master/Untitled_design__5_-removebg-preview.png?raw=true) |
+> "Create. Share. Go Viral."
 
----
+<br>
 
-## Getting Started
+## ✨ Key Features
 
-Follow these instructions to set up and run the BattisPutali app locally.
+<table>
+   <tr>
+      <td width="50%">
+         <h3>📱 Infinite Scrolling Feed</h3>
+         <p>Seamless video browsing for uninterrupted content consumption</p>
+      </td>
+      <td width="50%">
+         <h3>🧠 Smart Recommendations</h3>
+         <p>Personalized content discovery using advanced algorithms</p>
+      </td>
+   </tr>
+   <tr>
+      <td width="50%">
+         <h3>🎨 Premium Design</h3>
+         <p>Sleek, intuitive interface with engaging visual aesthetics</p>
+      </td>
+      <td width="50%">
+         <h3>👤 Dynamic Profiles</h3>
+         <p>TikTok-inspired profiles showcasing your stats and content</p>
+      </td>
+   </tr>
+   <tr>
+      <td width="50%">
+         <h3>🎬 Creator Studio</h3>
+         <p>Intuitive tools to produce viral-worthy content effortlessly</p>
+      </td>
+      <td width="50%">
+         <h3>📊 Real-Time Analytics</h3>
+         <p>Monitor engagement metrics as they happen</p>
+      </td>
+   </tr>
+</table>
+
+<br>
+
+## 📱 Experience BattisPutali
+
+<div align="center">
+   <img src="https://github.com/NikeGunn/admin_-their_assets/blob/master/Untitled_design__5_-removebg-preview.png?raw=true" alt="App Screenshots" width="800">
+</div>
+
+<br>
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- **Node.js** (v14 or higher)
-- **Expo CLI** (v4 or higher)
-- **Firebase** account for authentication and database setup
+```
+✓ Node.js (v14+)
+✓ Expo CLI (v4+)
+✓ Firebase account
+```
 
-### Installation
+### Quick Setup
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/nikegunn/BattisPutali.git
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/nikegunn/BattisPutali.git && cd BattisPutali
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# Add your Firebase configuration details
+
+# Launch
+npm start
+```
+
+<br>
+
+## 🤝 Contributing
+
+Contributions make the open-source community amazing! Any contributions you make are **greatly appreciated**.
+
+<br>
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+<br>
+
+<div align="center">
+   <h3>Connect with the Creator</h3>
+
+   <a href="https://github.com/nikegunn">
+      <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+   </a>
+
+   <p>Built with ❤️ by Nikhil Bhagat</p>
+</div>
