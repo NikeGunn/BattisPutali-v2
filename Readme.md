@@ -1,5 +1,5 @@
 <div align="center">
-   <img src="https://github.com/NikeGunn/imagess/blob/main/BATTISPUTALI-ASSETS/battisputali-nikhil-bhagat-developer.gif?raw=true" alt="BattisPutali App Demo" width="320">
+   <img src="https://github.com/NikeGunn/imagess/blob/main/BATTISPUTALI-ASSETS/battisputali-nikhil-bhagat-developer.gif?raw=true" alt="BattisPutali App Demo" width="250">
 
    # BATTISPUTALI
 
